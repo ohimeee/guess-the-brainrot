@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Guess the Brainrot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            position: relative;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        #coverPage, #gameArea, #scoreSummary {
+            max-width: 400px;
+            margin: 50px auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        #restartBtn {
+            max-width: 400px;
+            margin: 20px auto 0 auto;
+            padding: 10px 25px;
+            font-size: 18px;
+            cursor: pointer;
+            display: none;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        img {
+            width: 200px;
+            height: auto;
+            margin: 10px auto;
+            border: 2px solid #4CAF50;
+            border-radius: 5px;
+            display: block;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px auto;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            width: 100%;
+            max-width: 200px;
+            display: block;
+            box-sizing: border-box;
+        }
+        button:disabled {
+            cursor: default;
+            opacity: 0.6;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        #scoreSummary {
+            font-size: 22px;
+            margin-top: 30px;
+            display: none;
+            position: relative;
+            padding-bottom: 30px;
+        }
+        #choices {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #timer {
+            font-size: 24px;
+            margin: 20px 0;
+            color: #d9534f;
+            font-weight: bold;
+        }
+        #watermark {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+            user-select: none;
+        }
+    </style>
+</head>
+<body>
+
+<div id="coverPage">
+    <h1>Guess the Brainrot Game!</h1>
+    <p>You have 15 seconds to answer each picture.</p>
+    <p>Click the Play button to start.</p>
+    <button id="playBtn">Play</button>
+</div>
+
+<button id="restartBtn">Play Again</button>
+
+<div id="gameArea" style="display:none;">
+    <p>Choose the correct picture name from the options below:</p>
+    <img id="targetImage" src="" alt="Guess the picture" />
+    <div id="timer">15</div>
+    <div id="choices"></div>
+    <div class="result" id="result"></div>
+</div>
+
+<div id="scoreSummary">
+    <!-- Scores will be shown here -->
+    <div id="watermark">@hime</div>
+</div>
+
+<script>
+    const images = [
+        {
+            src: "https://static.wikia.nocookie.net/brainrotnew/images/e/e3/Bombini_Gusini.jpg/revision/latest?cb=20250416185048",
+            name: "Bombini Gusini"
+        },
+        {
+            src: "https://static.wikia.nocookie.net/brainrotnew/images/2/26/Trulimero_Trulichina.png/revision/latest?cb=20250403115127",
+            name: "Trulimero Trulichina"
+        },
+        {
+            src: "https://static.wikia.nocookie.net/brainrotnew/images/a/ac/Tralalero_tralala.jpg/revision/latest?cb=20250321131418",
+            name: "Tralalero Tralala"
+        },
+        {
+            src: "https://static.wikia.nocookie.net/brainrotnew/images/f/f7/Brr_Brr_Patapim.png/revision/latest?cb=20250326180223",
+            name: "Brr Brr Patapim"
+        },
+        {
+            src: "https://static.wikia.nocookie.net/brainrotnew/images/1/10/Bombardiro_Crocodilo.jpg/revision/latest?cb=20250417102447",
+            name: "Bombardiro Crocodilo"
+        },
+        {
+            src: "https://static.wikia.nocookie.net/brainrotnew/images/f/f1/Lirili_rili_ralila.png/revision/latest?cb=20250324152453",
+            name: "Lirilì Larilà"
+        },
+        {
+            src: "https://static.wikia.nocookie.net/brainrotnew/images/3/38/Hq720.jpg/revision/latest?cb=20250405141658",
+            name: "Capuccino Assassino"
+        },
+        {
+            src: "https://i1.sndcdn.com/artworks-qJ5IFyKat8H70Vkz-tYUbnQ-t500x500.jpg",
+            name: "Tung Tung Tung Sahur"
+        },
+        {
+            src: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Boneca_Ambalabu.jpg/250px-Boneca_Ambalabu.jpg",
+            name: "Boneca Ambalabu"
+        },
+        {
+            src: "https://i.namu.wiki/i/Yh2w8-t8J8ojuebdpNkDXOx3lRvFJsFxNmiwZk-YfMVY9U1WxQ63nUyuDogyPHhNk5hyRZH1XDrGXpw5wg5FIDIbanPfxHER4CyQ78DiSg2ZO8fc7UtXFIgwFD995ap7jMK891x5XzqKspdLBslk6KhwLjwQAhWrmkZZ6v7HCaE.webp",
+            name: "Trippi Troppi"
+        },
+        {
+            src: "https://i.namu.wiki/i/Yh2w8-t8J8ojuebdpNkDXOgFFFVbLw9v_R9XkFSw9dlD91Rn0NUrMPB0eUmqEBg1SVrFAl7LEyt1IkNLc3hNd-3wZnd1kZ5n_UeHCgrFZo5BQAD8WI6yphdI5W8YWavDvO_2WYWrVbEkXtSwdgYtDLonjSZEasPet8_oX_jZYaA.webp",
+            name: "Ballerina Cappuccina"
+        },
+        {
+            src: "https://i.namu.wiki/i/Yh2w8-t8J8ojuebdpNkDXP4CbXijS-Ghgo1jN6A_0ODM8VDq-bvxI9ewJ9vcV74TFMfWK87Pn1VJu2XK9BzqZrU8Xi2UoE83ykvkOPaPa7pMkbcVs8ulIVz_Ak0G-_diAuNsDBXWcaFX4nULYAK90IQpLbk6Diy5dtlEV1HpdlE.webp",
+            name: "Burbaloni Lulilolli"
+        }
+    ];
+
+    // Preload images to speed up loading
+    images.forEach(({src}) => {
+        const img = new Image();
+        img.src = src;
+    });
+
+    const coverPage = document.getElementById('coverPage');
+    const gameArea = document.getElementById('gameArea');
+    const scoreSummary = document.getElementById('scoreSummary');
+    const restartBtn = document.getElementById('restartBtn');
+    const playBtn = document.getElementById('playBtn');
+
+    let shuffledImages = [];
+    let currentIndex = 0;
+    let correctCount = 0;
+    let wrongCount = 0;
+    let targetImage = null;
+    let timerInterval = null;
+    let timeLeft = 15;
+
+    playBtn.addEventListener('click', () => {
+        coverPage.style.display = 'none';
+        restartBtn.style.display = 'none';
+        startGame();
+    });
+
+    restartBtn.addEventListener('click', () => {
+        scoreSummary.style.display = 'none';
+        restartBtn.style.display = 'none';
+        gameArea.style.display = 'block';
+        startGame();
+    });
+
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function startGame() {
+        shuffledImages = shuffle([...images]);
+        currentIndex = 0;
+        correctCount = 0;
+        wrongCount = 0;
+        scoreSummary.style.display = 'none';
+        gameArea.style.display = 'block';
+        showNextImage();
+    }
+
+    function showNextImage() {
+        clearInterval(timerInterval);
+        timeLeft = 15;
+        updateTimerDisplay();
+
+        if (currentIndex >= shuffledImages.length) {
+            endGame();
+            return;
+        }
+
+        targetImage = shuffledImages[currentIndex];
+        document.getElementById("targetImage").src = targetImage.src;
+
+        const choices = [targetImage];
+        while (choices.length < 3) {
+            const randomChoice = images[Math.floor(Math.random() * images.length)];
+            if (!choices.some(c => c.name === randomChoice.name)) {
+                choices.push(randomChoice);
+            }
+        }
+        shuffle(choices);
+
+        const choicesDiv = document.getElementById("choices");
+        choicesDiv.innerHTML = '';
+        choices.forEach(choice => {
+            const button = document.createElement('button');
+            button.innerText = choice.name;
+            button.onclick = () => handleGuess(choice);
+            choicesDiv.appendChild(button);
+        });
+
+        document.getElementById('result').innerText = '';
+
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                autoNext();
+            }
+            updateTimerDisplay();
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        document.getElementById('timer').textContent = timeLeft + "s";
+    }
+
+    function handleGuess(selected) {
+        clearInterval(timerInterval);
+        disableButtons();
+
+        const resultDiv = document.getElementById("result");
+        if (selected.name === targetImage.name) {
+            correctCount++;
+            resultDiv.innerText = "Correct! 🎉";
+        } else {
+            wrongCount++;
+            resultDiv.innerText = `Wrong! The correct answer was "${targetImage.name}". 😢`;
+        }
+
+        currentIndex++;
+        setTimeout(showNextImage, 2000);
+    }
+
+    function disableButtons() {
+        const buttons = document.querySelectorAll("#choices button");
+        buttons.forEach(btn => btn.disabled = true);
+    }
+
+    function autoNext() {
+        disableButtons();
+        wrongCount++;
+        const resultDiv = document.getElementById("result");
+        resultDiv.innerText = `Time's up! The correct answer was "${targetImage.name}". 😢`;
+
+        currentIndex++;
+        setTimeout(showNextImage, 2000);
+    }
+
+    function endGame() {
+        clearInterval(timerInterval);
+        gameArea.style.display = 'none';
+        scoreSummary.innerHTML = `
+            <p>Game over! Here are your results:</p>
+            <p><strong>Correct guesses:</strong> ${correctCount}</p>
+            <p><strong>Mistakes:</strong> ${wrongCount}</p>
+            <div id="watermark">@hime</div>
+        `;
+        scoreSummary.style.display = 'block';
+        restartBtn.style.display = 'block';
+        document.getElementById('timer').textContent = '';
+    }
+</script>
+
+</body>
+</html>
